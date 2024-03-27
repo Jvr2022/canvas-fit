@@ -1,48 +1,46 @@
-var size = require('element-size')
+import size from 'element-size';
 
-module.exports = fit
+const fit = (canvas, parent, scale = 1) => {
+  const isSVG = canvas.nodeName.toUpperCase() === 'SVG';
 
-var scratch = new Float32Array(2)
+  canvas.style.position = canvas.style.position || 'absolute';
+  canvas.style.top = 0;
+  canvas.style.left = 0;
 
-function fit(canvas, parent, scale) {
-  var isSVG = canvas.nodeName.toUpperCase() === 'SVG'
+  const resize = () => {
+    const p = parent || canvas.parentNode;
+    const scratch = new Float32Array(2);
 
-  canvas.style.position = canvas.style.position || 'absolute'
-  canvas.style.top = 0
-  canvas.style.left = 0
+    let width, height;
 
-  resize.scale  = parseFloat(scale || 1)
-  resize.parent = parent
-
-  return resize()
-
-  function resize() {
-    var p = resize.parent || canvas.parentNode
     if (typeof p === 'function') {
-      var dims   = p(scratch) || scratch
-      var width  = dims[0]
-      var height = dims[1]
-    } else
-    if (p && p !== document.body) {
-      var psize  = size(p)
-      var width  = psize[0]|0
-      var height = psize[1]|0
+      const [w, h] = p(scratch) || scratch;
+      width = w;
+      height = h;
+    } else if (p && p !== document.body) {
+      const [w, h] = size(p);
+      width = w|0;
+      height = h|0;
     } else {
-      var width  = window.innerWidth
-      var height = window.innerHeight
+      width = window.innerWidth;
+      height = window.innerHeight;
     }
 
     if (isSVG) {
-      canvas.setAttribute('width', width * resize.scale + 'px')
-      canvas.setAttribute('height', height * resize.scale + 'px')
+      canvas.setAttribute('width', `${width * scale}px`);
+      canvas.setAttribute('height', `${height * scale}px`);
     } else {
-      canvas.width = width * resize.scale
-      canvas.height = height * resize.scale
+      canvas.width = width * scale;
+      canvas.height = height * scale;
     }
 
-    canvas.style.width = width + 'px'
-    canvas.style.height = height + 'px'
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
-    return resize
-  }
-}
+    return resize;
+  };
+
+  return resize();
+};
+
+export default fit;
